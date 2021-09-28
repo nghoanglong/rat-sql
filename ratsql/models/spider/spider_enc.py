@@ -247,9 +247,9 @@ class SpiderEncoderV2Preproc(abstract_preproc.AbstractPreproc):
         self.vocab_builder.save(self.vocab_word_freq_path)
 
         for section, texts in self.texts.items():
-            with open(os.path.join(self.data_dir, section + '.jsonl'), 'w') as f:
+            with open(os.path.join(self.data_dir, section + '.jsonl'), 'w', encoding='utf-8') as f:
                 for text in texts:
-                    f.write(json.dumps(text) + '\n')
+                    f.write(json.dumps(text, ensure_ascii=False) + '\n')
 
     def load(self):
         self.vocab = vocab.Vocab.load(self.vocab_path)

@@ -4,7 +4,6 @@ import os
 import time
 
 import bpemb
-import corenlp
 import torch
 import torchtext
 

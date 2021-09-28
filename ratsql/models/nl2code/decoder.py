@@ -138,9 +138,9 @@ class NL2CodeDecoderPreproc(abstract_preproc.AbstractPreproc):
         self.vocab.save(self.vocab_path)
 
         for section, items in self.items.items():
-            with open(os.path.join(self.data_dir, section + '.jsonl'), 'w') as f:
+            with open(os.path.join(self.data_dir, section + '.jsonl'), 'w', encoding='utf-8') as f:
                 for item in items:
-                    f.write(json.dumps(attr.asdict(item)) + '\n')
+                    f.write(json.dumps(attr.asdict(item), ensure_ascii=False) + '\n')
 
         # observed_productions
         self.sum_type_constructors = serialization.to_dict_with_sorted_values(
@@ -150,21 +150,21 @@ class NL2CodeDecoderPreproc(abstract_preproc.AbstractPreproc):
         self.seq_lengths = serialization.to_dict_with_sorted_values(
             self.seq_lengths)
         self.primitive_types = sorted(self.primitive_types)
-        with open(self.observed_productions_path, 'w') as f:
+        with open(self.observed_productions_path, 'w', encoding='utf-8') as f:
             json.dump({
                 'sum_type_constructors': self.sum_type_constructors,
                 'field_presence_infos': self.field_presence_infos,
                 'seq_lengths': self.seq_lengths,
                 'primitive_types': self.primitive_types,
-            }, f, indent=2, sort_keys=True)
+            }, f, indent=2, sort_keys=True, ensure_ascii=False)
 
         # grammar
         self.all_rules, self.rules_mask = self._calculate_rules()
-        with open(self.grammar_rules_path, 'w') as f:
+        with open(self.grammar_rules_path, 'w', encoding='utf-8') as f:
             json.dump({
                 'all_rules': self.all_rules,
                 'rules_mask': self.rules_mask,
-            }, f, indent=2, sort_keys=True)
+            }, f, indent=2, sort_keys=True, ensure_ascii=False)
 
     def load(self):
         self.vocab = vocab.Vocab.load(self.vocab_path)

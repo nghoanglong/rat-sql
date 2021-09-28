@@ -79,8 +79,8 @@ class Vocab(collections.abc.Set):
         return Vocab(json.load(open(in_path)), special_elems=())
 
     def save(self, out_path):
-        with open(out_path, 'w') as f:
-            json.dump([self.id_to_elem[i] for i in range(len(self.id_to_elem))],  f)
+        with open(out_path, 'w', encoding='utf-8') as f:
+            json.dump([self.id_to_elem[i] for i in range(len(self.id_to_elem))],  f, indent=4, ensure_ascii=False)
 
 
 class VocabBuilder:
@@ -106,8 +106,8 @@ class VocabBuilder:
                     *args, **kwargs)
     
     def save(self, path):
-        with open(path, "w") as f:
-            json.dump(self.word_freq, f)
+        with open(path, "w", encoding='utf-8') as f:
+            json.dump(self.word_freq, f, indent=4, ensure_ascii=False)
     
     def load(self, path):
         with open(path, "r") as f:
