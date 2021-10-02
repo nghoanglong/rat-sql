@@ -8,6 +8,7 @@ import torch
 import torchtext
 
 from ratsql.resources import corenlp
+from ratsql.resources import vncorenlp
 from ratsql.utils import registry
 
 
@@ -55,20 +56,27 @@ class GloVe(Embedder):
 
     @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):
-        ann = corenlp.annotate(text, self.corenlp_annotators)
+        # corenlp: ann = corenlp.annotate(text, self.corenlp_annotators)
+        ann = vncorenlp.tokenize(text)
         if self.lemmatize:
-            return [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
+            # corenlp: return [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
+            return [tok.lower() for sent in ann for tok in sent]
         else:
-            return [tok.word.lower() for sent in ann.sentence for tok in sent.token]
+            # corenlp: return [tok.word.lower() for sent in ann.sentence for tok in sent.token]
+            return [tok.lower() for sent in ann for tok in sent]
     
     @functools.lru_cache(maxsize=1024)
     def tokenize_for_copying(self, text):
-        ann = corenlp.annotate(text, self.corenlp_annotators)
-        text_for_copying = [tok.originalText.lower() for sent in ann.sentence for tok in sent.token]
+        # corenlp: ann = corenlp.annotate(text, self.corenlp_annotators)
+        ann = vncorenlp.tokenize(text)
+        # corenlp: text_for_copying = [tok.originalText.lower() for sent in ann.sentence for tok in sent.token]
+        text_for_copying = [tok.lower() for sent in ann for tok in sent]
         if self.lemmatize:
-            text = [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
+            # corenlp: text = [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
+            text = [tok.lower() for sent in ann for tok in sent]
         else:
-            text = [tok.word.lower() for sent in ann.sentence for tok in sent.token]
+            # corenlp: text = [tok.word.lower() for sent in ann.sentence for tok in sent.token]
+            text = [tok.lower() for sent in ann for tok in sent]
         return text, text_for_copying
 
     def untokenize(self, tokens):
