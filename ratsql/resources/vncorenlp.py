@@ -1,5 +1,6 @@
 import os
 import sys
+import requests, zipfile, io
 
 from vncorenlp import VnCoreNLP
 import requests
@@ -8,12 +9,21 @@ import requests
 class VNCoreNLP:
     def __init__(self):
         if not os.environ.get('VNCORENLP_HOME'): 
+            extract_dir = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    '../../third_party'))
+            r = requests.get('https://github.com/vncorenlp/VnCoreNLP/archive/master.zip')
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            z.extractall(extract_dir)
+            
             vncorenlp_dir = os.path.abspath(
                 os.path.join(
                     os.path.dirname(__file__),
                     '../../third_party/VnCoreNLP-master'))
             os.environ["VNCORENLP_HOME"] = vncorenlp_dir
-        if not os.path.exists(os.environ['CORENLP_HOME']):
+
+        if not os.path.exists(os.environ['VNCORENLP_HOME']):
             raise Exception(
                 f'''Please install Stanford CoreNLP and put it at {os.environ['CORENLP_HOME']}.
 
