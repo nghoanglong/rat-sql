@@ -18,17 +18,15 @@ class VNCoreNLP:
             z.extractall(extract_dir)
             
             vncorenlp_dir = os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    '../../third_party/VnCoreNLP-master'))
+                os.path.join(extract_dir,'VnCoreNLP-master'))
             os.environ["VNCORENLP_HOME"] = vncorenlp_dir
 
         if not os.path.exists(os.environ['VNCORENLP_HOME']):
             raise Exception(
-                f'''Please install Stanford CoreNLP and put it at {os.environ['CORENLP_HOME']}.
+                f'''Please install VnCoreNLP and put it at {os.environ['VNCORENLP_HOME']}.
 
-                Direct URL: http://nlp.stanford.edu/software/stanford-corenlp-full-2018-10-05.zip
-                Landing page: https://stanfordnlp.github.io/CoreNLP/''')
+                Direct URL: https://github.com/vncorenlp/VnCoreNLP/archive/master.zip
+                Landing page: https://github.com/vncorenlp/VnCoreNLP''')
         self.client = VnCoreNLP(vncorenlp_dir + '/VnCoreNLP-1.1.1.jar')
 
     def __del__(self):
