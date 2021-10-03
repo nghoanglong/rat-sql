@@ -57,8 +57,8 @@ function(output_from, data_path='data/spider/') {
         },
         encoder_preproc: {
             word_emb: {
-                name: 'phow2v',
-                kind: '300',
+                name: 'glove',
+                kind: '42B',
             },
             count_tokens_in_word_emb_for_vocab: false,
             min_freq: 50,

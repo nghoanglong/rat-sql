@@ -92,7 +92,10 @@ class GloVe(Embedder):
 @registry.register('word_emb', 'phow2v')
 class PhoW2V(Embedder):
     def __init__(self, emb_path):
-        self.phoemb = KeyedVectors.load_word2vec_format(emb_path, binary=False)
+        load_w2v = KeyedVectors.load_word2vec_format(emb_path, binary=False)
+        load_w2v.init_sims(replace=True)
+        load_w2v.save(emb_path + '/w2v')
+        self.phoemb = KeyedVectors.load(emb_path + '/w2v', mmap='r')
         self.dim = self.phoemb.vector_size
         self.vectors = torch.tensor(self.phoemb.vectors)
 
@@ -100,7 +103,7 @@ class PhoW2V(Embedder):
     def tokenize(self, text):
         ann = vncorenlp.tokenize(text)
         return [tok.lower() for sent in ann for tok in sent]
-        
+
     @functools.lru_cache(maxsize=1024)
     def tokenize_for_copying(self, text):
         ann = vncorenlp.tokenize(text)
