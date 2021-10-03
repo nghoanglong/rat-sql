@@ -34,8 +34,8 @@ function(args, data_path=_data_path) _base(output_from=true, data_path=data_path
         encoder_preproc+: {
             word_emb+: {
                 name: 'phow2v',
-                kind: '300',
-                emb_path: 'path_to_embedding',
+                file_name: 'embedding_file_name',
+                emb_path: 'embedding_folder',
             },
             min_freq: 4,
             max_count: 5000,
