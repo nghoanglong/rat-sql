@@ -96,10 +96,18 @@ class PhoW2V(Embedder):
         self.dim = self.phoemb.vector_size
         self.vectors = torch.tensor(self.phoemb.vectors)
 
+    @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):
         ann = vncorenlp.tokenize(text)
         return [tok.lower() for sent in ann for tok in sent]
-    
+        
+    @functools.lru_cache(maxsize=1024)
+    def tokenize_for_copying(self, text):
+        ann = vncorenlp.tokenize(text)
+        text = [tok.lower() for sent in ann for tok in sent]
+        text_for_copying = [tok.lower() for sent in ann for tok in sent]
+        return text, text_for_copying
+
     def untokenize(self, tokens):
         return ' '.join(tokens)
 
