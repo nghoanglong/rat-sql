@@ -6,10 +6,12 @@ import time
 import bpemb
 import torch
 import torchtext
+import requests, zipfile, io
 
 from ratsql.resources import corenlp
 from ratsql.resources import vncorenlp
 from ratsql.utils import registry
+from gensim.models.keyedvectors import KeyedVectors
 
 
 class Embedder(metaclass=abc.ABCMeta):
@@ -56,27 +58,20 @@ class GloVe(Embedder):
 
     @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):
-        # corenlp: ann = corenlp.annotate(text, self.corenlp_annotators)
-        ann = vncorenlp.tokenize(text)
+        ann = corenlp.annotate(text, self.corenlp_annotators)
         if self.lemmatize:
-            # corenlp: return [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
-            return [tok.lower() for sent in ann for tok in sent]
+            return [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
         else:
-            # corenlp: return [tok.word.lower() for sent in ann.sentence for tok in sent.token]
-            return [tok.lower() for sent in ann for tok in sent]
+            return [tok.word.lower() for sent in ann.sentence for tok in sent.token]
     
     @functools.lru_cache(maxsize=1024)
     def tokenize_for_copying(self, text):
-        # corenlp: ann = corenlp.annotate(text, self.corenlp_annotators)
-        ann = vncorenlp.tokenize(text)
-        # corenlp: text_for_copying = [tok.originalText.lower() for sent in ann.sentence for tok in sent.token]
-        text_for_copying = [tok.lower() for sent in ann for tok in sent]
+        ann = corenlp.annotate(text, self.corenlp_annotators)
+        text_for_copying = [tok.originalText.lower() for sent in ann.sentence for tok in sent.token]
         if self.lemmatize:
-            # corenlp: text = [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
-            text = [tok.lower() for sent in ann for tok in sent]
+            text = [tok.lemma.lower() for sent in ann.sentence for tok in sent.token]
         else:
-            # corenlp: text = [tok.word.lower() for sent in ann.sentence for tok in sent.token]
-            text = [tok.lower() for sent in ann for tok in sent]
+            text = [tok.word.lower() for sent in ann.sentence for tok in sent.token]
         return text, text_for_copying
 
     def untokenize(self, tokens):
@@ -94,6 +89,31 @@ class GloVe(Embedder):
     def to(self, device):
         self.vectors = self.vectors.to(device)
 
+@registry.register('word_emb', 'phow2v')
+class PhoW2V(Embedder):
+    def __init__(self, emb_path):
+        self.phoemb = KeyedVectors.load_word2vec_format(emb_path, binary=False)
+        self.dim = self.phoemb.vector_size
+        self.vectors = torch.tensor(self.phoemb.vectors)
+
+    def tokenize(self, text):
+        ann = vncorenlp.tokenize(text)
+        return [tok.lower() for sent in ann for tok in sent]
+    
+    def untokenize(self, tokens):
+        return ' '.join(tokens)
+
+    def lookup(self, token):
+        try:
+            return self.phoemb.get_vector(token)
+        except:
+            return None
+
+    def contains(self, token):
+        return token in self.phoemb.vocab
+
+    def to(self, device):
+        self.vectors = self.vectors.to(device)
 
 @registry.register('word_emb', 'bpemb')
 class BPEmb(Embedder):
@@ -119,3 +139,4 @@ class BPEmb(Embedder):
 
     def to(self, device):
         self.vectors = self.vectors.to(device)
+
