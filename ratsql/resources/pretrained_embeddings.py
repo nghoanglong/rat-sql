@@ -97,7 +97,7 @@ class PhoW2V(Embedder):
         load_w2v.save(emb_path + '/w2v')
         self.phoemb = KeyedVectors.load(emb_path + '/w2v', mmap='r')
         self.dim = self.phoemb.vector_size
-        self.vectors = torch.tensor(self.phoemb.vectors)
+        # self.vectors = torch.tensor(self.phoemb.vectors)
 
     @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):
@@ -116,7 +116,7 @@ class PhoW2V(Embedder):
 
     def lookup(self, token):
         try:
-            return self.phoemb.get_vector(token)
+            return torch.tensor(self.phoemb.get_vector(token))
         except:
             return None
 
