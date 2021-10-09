@@ -129,6 +129,7 @@ class SpiderDataset(torch.utils.data.Dataset):
         self.paths = paths
         self.db_path = db_path
         self.examples = []
+        self.table_path = tables_paths
 
         self.schemas, self.eval_foreign_key_maps = load_tables(tables_paths)
 
@@ -178,7 +179,8 @@ class SpiderDataset(torch.utils.data.Dataset):
             self.evaluator = evaluation.Evaluator(
                 self.dataset.db_path,
                 self.foreign_key_maps,
-                'match')
+                'match',
+                self.dataset.table_path)
             self.results = []
 
         def add(self, item, inferred_code, orig_question=None):
