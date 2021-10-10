@@ -365,24 +365,8 @@ class Evaluator:
         self.etype = etype
 
         self.db_paths = {}
-
-        with open(schema_path) as f:
-            database_schemas = json.load(f)
         self.schemas = {}
-        all_schemas_got = {}
-        for schema in database_schemas:
-            temp_schema = {}
-            database_name = schema['db_id']
-            li_tables = schema['table_names']
-            for _, (table_id, column_name) in enumerate(schema['column_names']):
-                if table_id >= 0:
-                    if li_tables[table_id] not in temp_schema:
-                        temp_schema[li_tables[table_id]] = []
-                        temp_schema[li_tables[table_id]].append(column_name)
-                    else:
-                        temp_schema[li_tables[table_id]].append(column_name)
-            all_schemas_got[database_name] = temp_schema
-
+        all_schemas_got = self.get_all_schemas(schema_path)
         for db_name in self.kmaps.keys():
             db_path = os.path.join(db_dir, db_name, db_name + '.sqlite')
             self.db_paths[db_name] = db_path
@@ -576,6 +560,24 @@ class Evaluator:
                         scores[level]['partial'][type_]['f1'] = \
                             2.0 * scores[level]['partial'][type_]['acc'] * scores[level]['partial'][type_]['rec'] / (
                                     scores[level]['partial'][type_]['rec'] + scores[level]['partial'][type_]['acc'])
+    
+    def get_all_schemas(schema_path):
+        with open(schema_path) as f:
+            database_schemas = json.load(f)
+        all_schemas_got = {}
+        for schema in database_schemas:
+            temp_schema = {}
+            database_name = schema['db_id']
+            li_tables = schema['table_names_original']
+            for _, (table_id, column_name) in enumerate(schema['column_names_original']):
+                if table_id >= 0:
+                    if li_tables[table_id] not in temp_schema:
+                        temp_schema[li_tables[table_id]] = []
+                        temp_schema[li_tables[table_id]].append(column_name)
+                    else:
+                        temp_schema[li_tables[table_id]].append(column_name)
+            all_schemas_got[database_name] = temp_schema
+        return all_schemas_got
 
 
 def isValidSQL(sql, db):
