@@ -1,4 +1,4 @@
-local _base = import 'nl2code-base.libsonnet';
+local _base = import 'configs/nl2code-base.libsonnet';
 local _data_path = 'data/spider/';
 
 function(args, data_path=_data_path) _base(output_from=true, data_path=data_path) + {

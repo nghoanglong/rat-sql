@@ -1,6 +1,6 @@
 {
     logdir: "logdir/glove_run",
-    model_config: "configs/spider/nl2code-phow2v.jsonnet",
+    model_config: "configs/vitext2sql/nl2code-phow2v.jsonnet",
     model_config_args: {
         att: 0,
         cv_link: true,

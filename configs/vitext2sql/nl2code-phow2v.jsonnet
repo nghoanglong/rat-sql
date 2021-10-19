@@ -1,7 +1,8 @@
 local _base = import 'nl2code-base.libsonnet';
-local _data_path = 'data/vitex2sql/';
+local _data_path = 'need_to_change_data_path_here';
+local _embedding_path = 'need_to_change_embedding_path_here'
 
-function(args, data_path=_data_path) _base(output_from=true, data_path=data_path) + {
+function(args, data_path=_data_path, embedding_path=_embedding_path) _base(output_from=true, data_path=data_path) + {
     local lr = 0.000743552663260837,
     local end_lr = 0,
     local bs = 20,
@@ -9,13 +10,24 @@ function(args, data_path=_data_path) _base(output_from=true, data_path=data_path
 
     local lr_s = '%0.1e' % lr,
     local end_lr_s = '0e0',
+    local PREFIX = data_path,
+
     model_name: 'bs=%(bs)d,lr=%(lr)s,end_lr=%(end_lr)s,att=%(att)d' % ({
         bs: bs,
         lr: lr_s,
         end_lr: end_lr_s,
         att: att,
     }),
-
+    data+: {
+        train+: {
+            name: 'spider',
+            paths: [PREFIX + 'train_%s.json' % [s]
+              for s in ['vitext2sql']],
+        },
+        val+:{
+            name: 'spider',
+        },
+    },
     model+: {
         encoder+: {
             batch_encs_update: false,
@@ -34,8 +46,7 @@ function(args, data_path=_data_path) _base(output_from=true, data_path=data_path
         encoder_preproc+: {
             word_emb+: {
                 name: 'phow2v',
-                file_name: 'embedding_file_name',
-                emb_path: 'embedding_folder',
+                emb_path: emb_path,
             },
             min_freq: 4,
             max_count: 5000,

@@ -91,13 +91,13 @@ class GloVe(Embedder):
 
 @registry.register('word_emb', 'phow2v')
 class PhoW2V(Embedder):
-    def __init__(self, emb_path, file_name):
-        load_w2v = KeyedVectors.load_word2vec_format(os.path.join(emb_path, file_name), binary=False)
+    def __init__(self, emb_path):
+        load_w2v = KeyedVectors.load_word2vec_format(emb_path, binary=False)
         load_w2v.init_sims(replace=True)
-        load_w2v.save(emb_path + '/w2v')
-        self.phoemb = KeyedVectors.load(emb_path + '/w2v', mmap='r')
+        w2v_path = os.path.join(emb_path[:emb_path.rindex("/")], 'w2v')
+        load_w2v.save(w2v_path)
+        self.phoemb = KeyedVectors.load(w2v_path, mmap='r')
         self.dim = self.phoemb.vector_size
-        # self.vectors = torch.tensor(self.phoemb.vectors)
 
     @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):

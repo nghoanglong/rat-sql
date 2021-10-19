@@ -366,7 +366,7 @@ class Evaluator:
 
         self.db_paths = {}
         self.schemas = {}
-        all_schemas_got = self.get_all_schemas(schema_path)
+        all_schemas_got = self.get_all_schemas(schema_path[0])
         for db_name in self.kmaps.keys():
             db_path = os.path.join(db_dir, db_name, db_name + '.sqlite')
             self.db_paths[db_name] = db_path
@@ -561,7 +561,7 @@ class Evaluator:
                             2.0 * scores[level]['partial'][type_]['acc'] * scores[level]['partial'][type_]['rec'] / (
                                     scores[level]['partial'][type_]['rec'] + scores[level]['partial'][type_]['acc'])
     
-    def get_all_schemas(schema_path):
+    def get_all_schemas(self, schema_path):
         with open(schema_path) as f:
             database_schemas = json.load(f)
         all_schemas_got = {}
