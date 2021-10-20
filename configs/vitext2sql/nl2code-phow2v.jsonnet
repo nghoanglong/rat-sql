@@ -20,12 +20,12 @@ function(args, data_path=_data_path, embedding_path=_embedding_path) _base(outpu
     }),
     data+: {
         train+: {
-            name: 'spider',
+            name: 'vitext2sql',
             paths: [PREFIX + 'train_%s.json' % [s]
               for s in ['vitext2sql']],
         },
         val+:{
-            name: 'spider',
+            name: 'vitext2sql',
         },
     },
     model+: {
