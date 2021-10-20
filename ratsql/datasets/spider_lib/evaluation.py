@@ -25,6 +25,7 @@ import os
 import sqlite3
 
 from ratsql.datasets.spider_lib.process_sql import get_schema, Schema, get_sql
+from ratsql.datasets.vitext2sql import format_entity
 
 # Flag to disable value evaluation
 DISABLE_VALUE = True
@@ -873,6 +874,44 @@ def build_foreign_key_map(entry):
 
     return foreign_key_map
 
+def build_foreign_key_map_vitext2sql(entry):
+    cols_orig = entry["column_names_original"]
+    tables_orig = entry["table_names_original"]
+
+    # rebuild cols corresponding to idmap in Schema
+    cols = []
+    for col_orig in cols_orig:
+        if col_orig[0] >= 0:
+            t = format_entity(tables_orig[col_orig[0]])
+            c = format_entity(col_orig[1])
+            cols.append("__" + t.lower() + "." + c.lower() + "__")
+        else:
+            cols.append("__all__")
+
+    def keyset_in_list(k1, k2, k_list):
+        for k_set in k_list:
+            if k1 in k_set or k2 in k_set:
+                return k_set
+        new_k_set = set()
+        k_list.append(new_k_set)
+        return new_k_set
+
+    foreign_key_list = []
+    foreign_keys = entry["foreign_keys"]
+    for fkey in foreign_keys:
+        key1, key2 = fkey
+        key_set = keyset_in_list(key1, key2, foreign_key_list)
+        key_set.add(key1)
+        key_set.add(key2)
+
+    foreign_key_map = {}
+    for key_set in foreign_key_list:
+        sorted_list = sorted(list(key_set))
+        midx = sorted_list[0]
+        for idx in sorted_list:
+            foreign_key_map[cols[idx]] = cols[midx]
+
+    return foreign_key_map
 
 def build_foreign_key_map_from_json(table):
     with open(table) as f:

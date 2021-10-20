@@ -53,6 +53,13 @@ class Schema:
 def postprocess_original_name(s: str):
     return re.sub(r'([A-Z]+)', r' \1', s).replace('_', ' ').lower().strip()
 
+def format_entity(str_to_replace):
+    """Replace space between toks by the character "_"
+
+       Ex: "id hang_hoa" = "id_hang_hoa"
+    """
+    return str_to_replace.replace(" ", "_")
+
 def load_tables(paths):
     schemas = {}
     eval_foreign_key_maps = {}
@@ -66,7 +73,7 @@ def load_tables(paths):
                     id=i,
                     name=name.split(),
                     unsplit_name=name,
-                    orig_name=orig_name,
+                    orig_name=format_entity(orig_name),
                 )
                 for i, (name, orig_name) in enumerate(zip(
                     schema_dict['table_names'], schema_dict['table_names_original']))
@@ -77,7 +84,7 @@ def load_tables(paths):
                     table=tables[table_id] if table_id >= 0 else None,
                     name=col_name.split(),
                     unsplit_name=col_name,
-                    orig_name=orig_col_name,
+                    orig_name=format_entity(orig_col_name),
                     type=col_type,
                 )
                 for i, ((table_id, col_name), (_, orig_col_name), col_type) in enumerate(zip(
@@ -114,7 +121,7 @@ def load_tables(paths):
             db_id = schema_dict['db_id']
             assert db_id not in schemas
             schemas[db_id] = Schema(db_id, tables, columns, foreign_key_graph, schema_dict)
-            eval_foreign_key_maps[db_id] = evaluation.build_foreign_key_map(schema_dict)
+            eval_foreign_key_maps[db_id] = evaluation.build_foreign_key_map_vitext2sql(schema_dict)
 
     return schemas, eval_foreign_key_maps
 
