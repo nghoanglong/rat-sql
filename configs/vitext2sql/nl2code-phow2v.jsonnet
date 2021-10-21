@@ -1,8 +1,8 @@
-local _base = import 'nl2code-base.libsonnet';
+local _base = import '../nl2code-base.libsonnet';
 local _data_path = 'need_to_change_data_path_here';
-local _embedding_path = 'need_to_change_embedding_path_here'
+local _embedding_path = 'need_to_change_embedding_path_here';
 
-function(args, data_path=_data_path, embedding_path=_embedding_path) _base(output_from=true, data_path=data_path) + {
+function(args, data_path=_data_path) _base(output_from=true, data_path=data_path) + {
     local lr = 0.000743552663260837,
     local end_lr = 0,
     local bs = 20,
@@ -46,7 +46,7 @@ function(args, data_path=_data_path, embedding_path=_embedding_path) _base(outpu
         encoder_preproc+: {
             word_emb+: {
                 name: 'phow2v',
-                emb_path: emb_path,
+                emb_path: _embedding_path,
             },
             min_freq: 4,
             max_count: 5000,
