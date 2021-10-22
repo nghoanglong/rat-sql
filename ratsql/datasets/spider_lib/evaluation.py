@@ -463,7 +463,7 @@ class Evaluator:
             decor_toks = map(lambda tok: tok.replace(" ", "_") if "\"" not in tok else tok, query_toks)
             res = " ".join(decor_toks)
             return res
-            
+
         gold = concatenate_toks(gold)
         schema = self.schemas[db_name]
         g_sql = get_sql(schema, gold)
@@ -575,14 +575,14 @@ class Evaluator:
         for schema in database_schemas:
             temp_schema = {}
             database_name = schema['db_id']
-            li_tables = schema['table_names_original']
-            for _, (table_id, column_name) in enumerate(schema['column_names_original']):
+            li_tables = schema['table_names']
+            for _, (table_id, column_name) in enumerate(schema['column_names']):
                 if table_id >= 0:
-                    if li_tables[table_id] not in temp_schema:
-                        temp_schema[li_tables[table_id]] = []
-                        temp_schema[li_tables[table_id]].append(column_name)
+                    if format_entity(li_tables[table_id]) not in temp_schema:
+                        temp_schema[format_entity(li_tables[table_id])] = []
+                        temp_schema[format_entity(li_tables[table_id])].append(format_entity(column_name))
                     else:
-                        temp_schema[li_tables[table_id]].append(column_name)
+                        temp_schema[format_entity(li_tables[table_id])].append(format_entity(column_name))
             all_schemas_got[database_name] = temp_schema
         return all_schemas_got
 
