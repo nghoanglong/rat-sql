@@ -25,8 +25,8 @@ def main(args):
             output_path = args.output.replace('__LOGDIR__', real_logdir)
         else:
             output_path = args.output
-        with open(output_path, 'w') as f:
-            json.dump(metrics, f)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(metrics, f, ensure_ascii=ensure_ascii=False)
         print(f'Wrote eval results to {output_path}')
     else:
         print(metrics)
