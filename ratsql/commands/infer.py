@@ -54,7 +54,7 @@ class Inferer:
         return model
 
     def infer(self, model, output_path, args):
-        output = open(output_path, 'w')
+        output = open(output_path, 'w', encoding='utf-8')
 
         with torch.no_grad():
             if args.mode == 'infer':
@@ -88,7 +88,7 @@ class Inferer:
                 json.dumps({
                     'index': i,
                     'beams': decoded,
-                }) + '\n')
+                }, ensure_ascii=False) + '\n')
             output.flush()
 
     def _infer_one(self, model, data_item, preproc_item, beam_size, output_history=False, use_heuristic=True):

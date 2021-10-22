@@ -459,6 +459,12 @@ class Evaluator:
         return res
 
     def evaluate_one(self, db_name, gold, predicted):
+        def concatenate_toks(query_toks):
+            decor_toks = map(lambda tok: tok.replace(" ", "_") if "\"" not in tok else tok, query_toks)
+            res = " ".join(decor_toks)
+            return res
+            
+        gold = concatenate_toks(gold)
         schema = self.schemas[db_name]
         g_sql = get_sql(schema, gold)
         hardness = self.eval_hardness(g_sql)
