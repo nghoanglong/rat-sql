@@ -1,11 +1,11 @@
 local _base = import '../nl2code-base.libsonnet';
-local _data_path = 'need_to_change_data_path_here';
-local _embedding_path = 'need_to_change_embedding_path_here';
+local _data_path = '../../data/vitext2sql_syllable_level';
+local _embedding_path = '../../third_party/phow2v_emb/word2vec_vi_words_300dims.txt';
 
 function(args, data_path=_data_path) _base(output_from=true, data_path=data_path) + {
     local lr = 0.000743552663260837,
     local end_lr = 0,
-    local bs = 20,
+    local bs = 207,
     local att = args.att,
 
     local lr_s = '%0.1e' % lr,
@@ -91,6 +91,15 @@ function(args, data_path=_data_path) _base(output_from=true, data_path=data_path
         model_seed: att,
         data_seed:  att,
         init_seed:  att,
+
+        eval_batch_size: 1035,
+        keep_every_n: 330,
+        eval_every_n: 66,
+        save_every_n: 66,
+        report_every_n: 33,
+
+        max_steps: 1320,
+        num_eval_items: 1035,
     },
 
     lr_scheduler+: {
