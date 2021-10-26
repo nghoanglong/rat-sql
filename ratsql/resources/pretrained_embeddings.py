@@ -98,6 +98,7 @@ class PhoW2V(Embedder):
         load_w2v.save(w2v_path)
         self.phoemb = KeyedVectors.load(w2v_path, mmap='r')
         self.dim = self.phoemb.vector_size
+        self.vocab = list(self.phoemb.key_to_index.keys())
 
     @functools.lru_cache(maxsize=1024)
     def tokenize(self, text):
@@ -121,7 +122,7 @@ class PhoW2V(Embedder):
             return None
 
     def contains(self, token):
-        return token in self.phoemb.vocab
+        return token in self.vocab
 
     def to(self, device):
         self.vectors = self.vectors.to(device)
