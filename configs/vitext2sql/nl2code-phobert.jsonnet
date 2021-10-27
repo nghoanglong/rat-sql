@@ -17,7 +17,16 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
         bert_lr: bert_lr_s,
         end_lr: end_lr_s,
     }),
-
+    data+: {
+        train+: {
+            name: 'vitext2sql',
+            paths: [PREFIX + 'train_%s.json' % [s]
+              for s in ['vitext2sql']],
+        },
+        val+:{
+            name: 'vitext2sql',
+        },
+    },
     model+: {
         encoder+: {
             name: 'spider-bert',

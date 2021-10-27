@@ -1,6 +1,6 @@
 {
     logdir: "logdir/bert_run",
-    model_config: "configs/vitext2sql/nl2code-bert.jsonnet",
+    model_config: "configs/vitext2sql/nl2code-phobert.jsonnet",
     model_config_args: {
         data_path: 'data/vitext2sql/',
         bs: 3,
