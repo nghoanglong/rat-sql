@@ -11,6 +11,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
 
     local base_bert_enc_size = if args.bert_version == "bert-large-uncased-whole-word-masking" then 1024 else 768,
     local enc_size =  base_bert_enc_size,
+    local PREFIX = data_path,
 
     model_name: 'bs=%(bs)d,lr=%(lr)s,bert_lr=%(bert_lr)s,end_lr=%(end_lr)s,att=%(att)d' % (args + {
         lr: lr_s,
