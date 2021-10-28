@@ -1208,7 +1208,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
 
         self.counted_db_ids = set()
         self.preprocessed_schemas = {}
-
+        self.vncorenlp_tokenizer = True
         self.tokenizer = AutoTokenizer.from_pretrained(bert_version)
 
         # TODO: should get types from the data
@@ -1216,8 +1216,8 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         self.tokenizer.add_tokens([f"<type: {t}>" for t in column_types])
 
     def _tokenize(self, presplit, unsplit):
-        toks = self.vncorenlp.tokenize(unsplit)
-        if toks[0]:
+        if self.vncorenlp_tokenizer:
+            toks = vncorenlp.tokenize(unsplit)
             return toks[0]
         return presplit
 
@@ -1336,6 +1336,7 @@ class SpiderEncoderBert(torch.nn.Module):
 
         self.phobert_model = AutoModel.from_pretrained(bert_version)
         self.tokenizer = self.preproc.tokenizer
+        self.vncorenlp_tokenizer = self.preproc.vncorenlp_tokenizer
         self.phobert_model.resize_token_embeddings(len(self.tokenizer))  # several tokens added
 
     def forward(self, descs):
