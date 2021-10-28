@@ -847,7 +847,7 @@ class SpiderEncoderBertPreproc(SpiderEncoderV2Preproc):
     def _tokenize(self, presplit, unsplit):
         if self.tokenizer:
             toks = self.tokenizer.tokenize(unsplit)
-            return toks
+            return toks[0]
         return presplit
 
     def add_item(self, item, section, validation_info):
