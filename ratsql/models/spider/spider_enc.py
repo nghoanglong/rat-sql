@@ -1401,11 +1401,11 @@ class SpiderEncoderPhoBert(torch.nn.Module):
 
         if self.bert_token_type:
             tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
-            bert_output = self.phobert_model(tokens_tensor)[0]
+            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
         else:
-            bert_output = self.phobert_model(tokens_tensor)[0]
+            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
 
-        enc_output = bert_output
+        enc_output = phobert_output
 
         column_pointer_maps = [
             {
