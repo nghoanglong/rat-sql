@@ -29,6 +29,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
         },
     },
     model+: {
+        pretrained_model_name: phobert,
         encoder+: {
             name: 'vitext2sql-phobert',
             batch_encs_update:: null,
@@ -102,7 +103,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     },
 
     optimizer: {
-        name: 'AdamW',
+        name: 'phobertAdamw',
         lr: 0.0,
         phobert_lr: 0.0002,
     },

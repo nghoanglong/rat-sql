@@ -127,7 +127,7 @@ class Trainer:
                                                   config.get('lr_scheduler', {'name': 'noop'}),
                                                   param_groups=[optimizer.non_bert_param_group,
                                                                 optimizer.bert_param_group])
-            elif config["optimizer"].get("name", None) == 'AdamW':
+            elif config["optimizer"].get("name", None) == 'phobertAdamw':
                 phobert_params = list(self.model.encoder.phobert_model.parameters())
                 assert len(phobert_params) > 0
                 non_phobert_params = []
@@ -210,7 +210,7 @@ class Trainer:
                         norm_loss.backward()
 
                     if self.train_config.clip_grad:
-                        if config["optimizer"].get("name", None) == 'AdamW':
+                        if config["model"]["pretrained_model_name"] == "phobert":
                             torch.nn.utils.clip_grad_norm_(optimizer.phobert_param_group["params"], \
                                                         self.train_config.clip_grad)
                         else:
