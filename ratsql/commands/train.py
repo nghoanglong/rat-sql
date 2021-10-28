@@ -210,7 +210,7 @@ class Trainer:
                         norm_loss.backward()
 
                     if self.train_config.clip_grad:
-                        torch.nn.utils.clip_grad_norm_(optimizer.bert_param_group["params"], \
+                        torch.nn.utils.clip_grad_norm_(optimizer.phobert_param_group["params"], \
                                                        self.train_config.clip_grad)
                     optimizer.step()
                     lr_scheduler.update_lr(last_step)

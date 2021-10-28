@@ -11,7 +11,7 @@
         max_steps: 81000,
         num_layers: 8,
         lr: 7.44e-4,
-        bert_lr: 1e-5,
+        phobert_lr: 1e-5,
         att: 1,
         end_lr: 0,
         sc_link: true,

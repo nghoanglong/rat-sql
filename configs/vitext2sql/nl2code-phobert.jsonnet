@@ -6,7 +6,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     local data_path = args.data_path,
     
     local lr_s = '%0.1e' % args.lr,
-    local bert_lr_s = '%0.1e' % args.bert_lr,
+    local bert_lr_s = '%0.1e' % args.phobert_lr,
     local end_lr_s = if args.end_lr == 0 then '0e0' else '%0.1e' % args.end_lr,
 
     local base_bert_enc_size = if args.bert_version == "vinai/phobert-large" then 1024 else 768,
