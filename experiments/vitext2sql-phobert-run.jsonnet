@@ -18,7 +18,7 @@
         cv_link: true,
         use_align_mat: true,
         use_align_loss: true,
-        bert_token_type: true,
+        bert_token_type: false,
         decoder_hidden_size: 512,
         end_with_from: true, # equivalent to "SWGOIF" if true
         clause_order: null, # strings like "SWGOIF", it will be prioriotized over end_with_from 

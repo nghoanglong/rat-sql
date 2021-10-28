@@ -1401,7 +1401,7 @@ class SpiderEncoderPhoBert(torch.nn.Module):
 
         if self.bert_token_type:
             tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
-            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
+            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
         else:
             phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
 
