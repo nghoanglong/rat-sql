@@ -3,7 +3,7 @@
     model_config: "configs/spider/nl2code-bert.jsonnet",
     model_config_args: {
         data_path: 'data/spider/',
-        bs: 6,
+        bs: 3,
         num_batch_accumulated: 4,
         bert_version: "bert-large-uncased-whole-word-masking",
         summarize_header: "avg",

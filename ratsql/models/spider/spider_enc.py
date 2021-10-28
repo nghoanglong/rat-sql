@@ -714,107 +714,6 @@ class Bertokens:
             new_cv_link[m_type] = _match
         return new_cv_link
 
-
-class PhoBertokens:
-    def __init__(self, pieces):
-        self.pieces = pieces
-
-        self.normalized_pieces = None
-        self.recovered_pieces = None
-        self.idx_map = None
-
-        self.normalize_toks()
-
-    def normalize_toks(self):
-        """
-        If the token is not a word piece, then find its lemma
-        If it is, combine pieces into a word, and then find its lemma
-        E.g., a ##b ##c will be normalized as "abc", "", ""
-        NOTE: this is only used for schema linking
-        """
-        self.startidx2pieces = dict()
-        self.pieces2startidx = dict()
-        cache_start = None
-        for i, piece in enumerate(self.pieces + [""]):
-            if piece.startswith("##"):
-                if cache_start is None:
-                    cache_start = i - 1
-
-                self.pieces2startidx[i] = cache_start
-                self.pieces2startidx[i - 1] = cache_start
-            else:
-                if cache_start is not None:
-                    self.startidx2pieces[cache_start] = i
-                cache_start = None
-        assert cache_start is None
-
-        # combine pieces, "abc", "", ""
-        combined_word = {}
-        for start, end in self.startidx2pieces.items():
-            assert end - start + 1 < 10
-            pieces = [self.pieces[start]] + [self.pieces[_id].strip("##") for _id in range(start + 1, end)]
-            word = "".join(pieces)
-            combined_word[start] = word
-
-        # remove "", only keep "abc"
-        idx_map = {}
-        new_toks = []
-        for i, piece in enumerate(self.pieces):
-            if i in combined_word:
-                idx_map[len(new_toks)] = i
-                new_toks.append(combined_word[i])
-            elif i in self.pieces2startidx:
-                # remove it
-                pass
-            else:
-                idx_map[len(new_toks)] = i
-                new_toks.append(piece)
-        self.idx_map = idx_map
-
-        # lemmatize "abc"
-        normalized_toks = []
-        for i, tok in enumerate(new_toks):
-            ann = vncorenlp.tokenize(tok)
-            lemmas = [tok.lower() for sent in ann for tok in sent]
-            lemma_word = " ".join(lemmas)
-            normalized_toks.append(lemma_word)
-
-        self.normalized_pieces = normalized_toks
-        self.recovered_pieces = new_toks
-
-    def phobert_schema_linking(self, columns, tables):
-        question_tokens = self.normalized_pieces
-        column_tokens = [c.normalized_pieces for c in columns]
-        table_tokens = [t.normalized_pieces for t in tables]
-        sc_link = compute_schema_linking(question_tokens, column_tokens, table_tokens)
-
-        new_sc_link = {}
-        for m_type in sc_link:
-            _match = {}
-            for ij_str in sc_link[m_type]:
-                q_id_str, col_tab_id_str = ij_str.split(",")
-                q_id, col_tab_id = int(q_id_str), int(col_tab_id_str)
-                real_q_id = self.idx_map[q_id]
-                _match[f"{real_q_id},{col_tab_id}"] = sc_link[m_type][ij_str]
-
-            new_sc_link[m_type] = _match
-        return new_sc_link
-
-    def phobert_cv_linking(self, schema):
-        question_tokens = self.recovered_pieces  # Not using normalized tokens here because values usually match exactly
-        cv_link = compute_cell_value_linking(question_tokens, schema)
-
-        new_cv_link = {}
-        for m_type in cv_link:
-            _match = {}
-            for ij_str in cv_link[m_type]:
-                q_id_str, col_tab_id_str = ij_str.split(",")
-                q_id, col_tab_id = int(q_id_str), int(col_tab_id_str)
-                real_q_id = self.idx_map[q_id]
-                _match[f"{real_q_id},{col_tab_id}"] = cv_link[m_type][ij_str]
-            new_cv_link[m_type] = _match
-        return new_cv_link
-
 class SpiderEncoderBertPreproc(SpiderEncoderV2Preproc):
 
     def __init__(
@@ -1186,6 +1085,106 @@ class SpiderEncoderBert(torch.nn.Module):
             tok_type_lists.append(_tok_type_list)
         return toks_ids, att_masks, tok_type_lists
 
+class PhoBertokens:
+    def __init__(self, pieces):
+        self.pieces = pieces
+
+        self.normalized_pieces = None
+        self.recovered_pieces = None
+        self.idx_map = None
+
+        self.normalize_toks()
+
+    def normalize_toks(self):
+        """
+        If the token is not a word piece, then find its lemma
+        If it is, combine pieces into a word, and then find its lemma
+        E.g., a ##b ##c will be normalized as "abc", "", ""
+        NOTE: this is only used for schema linking
+        """
+        self.startidx2pieces = dict()
+        self.pieces2startidx = dict()
+        cache_start = None
+        for i, piece in enumerate(self.pieces + [""]):
+            if piece.startswith("##"):
+                if cache_start is None:
+                    cache_start = i - 1
+
+                self.pieces2startidx[i] = cache_start
+                self.pieces2startidx[i - 1] = cache_start
+            else:
+                if cache_start is not None:
+                    self.startidx2pieces[cache_start] = i
+                cache_start = None
+        assert cache_start is None
+
+        # combine pieces, "abc", "", ""
+        combined_word = {}
+        for start, end in self.startidx2pieces.items():
+            assert end - start + 1 < 10
+            pieces = [self.pieces[start]] + [self.pieces[_id].strip("##") for _id in range(start + 1, end)]
+            word = "".join(pieces)
+            combined_word[start] = word
+
+        # remove "", only keep "abc"
+        idx_map = {}
+        new_toks = []
+        for i, piece in enumerate(self.pieces):
+            if i in combined_word:
+                idx_map[len(new_toks)] = i
+                new_toks.append(combined_word[i])
+            elif i in self.pieces2startidx:
+                # remove it
+                pass
+            else:
+                idx_map[len(new_toks)] = i
+                new_toks.append(piece)
+        self.idx_map = idx_map
+
+        # lemmatize "abc"
+        normalized_toks = []
+        for i, tok in enumerate(new_toks):
+            ann = vncorenlp.tokenize(tok)
+            lemmas = [tok.lower() for sent in ann for tok in sent]
+            lemma_word = " ".join(lemmas)
+            normalized_toks.append(lemma_word)
+
+        self.normalized_pieces = normalized_toks
+        self.recovered_pieces = new_toks
+
+    def phobert_schema_linking(self, columns, tables):
+        question_tokens = self.normalized_pieces
+        column_tokens = [c.normalized_pieces for c in columns]
+        table_tokens = [t.normalized_pieces for t in tables]
+        sc_link = compute_schema_linking(question_tokens, column_tokens, table_tokens)
+
+        new_sc_link = {}
+        for m_type in sc_link:
+            _match = {}
+            for ij_str in sc_link[m_type]:
+                q_id_str, col_tab_id_str = ij_str.split(",")
+                q_id, col_tab_id = int(q_id_str), int(col_tab_id_str)
+                real_q_id = self.idx_map[q_id]
+                _match[f"{real_q_id},{col_tab_id}"] = sc_link[m_type][ij_str]
+
+            new_sc_link[m_type] = _match
+        return new_sc_link
+
+    def phobert_cv_linking(self, schema):
+        question_tokens = self.recovered_pieces  # Not using normalized tokens here because values usually match exactly
+        cv_link = compute_cell_value_linking(question_tokens, schema)
+
+        new_cv_link = {}
+        for m_type in cv_link:
+            _match = {}
+            for ij_str in cv_link[m_type]:
+                q_id_str, col_tab_id_str = ij_str.split(",")
+                q_id, col_tab_id = int(q_id_str), int(col_tab_id_str)
+                real_q_id = self.idx_map[q_id]
+                _match[f"{real_q_id},{col_tab_id}"] = cv_link[m_type][ij_str]
+            new_cv_link[m_type] = _match
+        return new_cv_link
+
 class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
 
     def __init__(
@@ -1291,7 +1290,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         self.tokenizer = AutoTokenizer.from_pretrained(self.data_dir)
 
 @registry.register('encoder', 'vitext2sql-phobert')
-class SpiderEncoderBert(torch.nn.Module):
+class SpiderEncoderPhoBert(torch.nn.Module):
     Preproc = Vitext2sqlEncoderPhoBertPreproc
     batched = True
 
@@ -1402,11 +1401,9 @@ class SpiderEncoderBert(torch.nn.Module):
 
         if self.bert_token_type:
             tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
-            bert_output = self.phobert_model(tokens_tensor,
-                                          attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
+            bert_output = self.phobert_model(tokens_tensor)[0]
         else:
-            bert_output = self.phobert_model(tokens_tensor,
-                                          attention_mask=att_masks_tensor)[0]
+            bert_output = self.phobert_model(tokens_tensor)[0]
 
         enc_output = bert_output
 
