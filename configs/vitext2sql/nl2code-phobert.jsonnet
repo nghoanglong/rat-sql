@@ -102,9 +102,9 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     },
 
     optimizer: {
-        name: 'Adamw',
+        name: 'AdamW',
         lr: 0.0,
-        bert_lr: 0.0002,
+        phobert_lr: 0.0002,
     },
 
     lr_scheduler+: {

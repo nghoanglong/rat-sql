@@ -127,7 +127,7 @@ class Trainer:
                                                   config.get('lr_scheduler', {'name': 'noop'}),
                                                   param_groups=[optimizer.non_bert_param_group,
                                                                 optimizer.bert_param_group])
-            elif config["optimizer"].get("name", None) == 'Adamw':
+            elif config["optimizer"].get("name", None) == 'AdamW':
                 phobert_params = list(self.model.encoder.phobert_model.parameters())
                 assert len(phobert_params) > 0
                 non_phobert_params = []
