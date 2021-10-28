@@ -218,7 +218,7 @@ class Trainer:
 
                 # Report metrics
                 if last_step % self.train_config.report_every_n == 0:
-                    self.logger.log(f'Step {last_step}: loss={loss.item():.4f}')
+                    self.logger.log(f'Step {last_step}: loss={loss.item()}')
 
                 last_step += 1
                 # Run saver
