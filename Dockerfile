@@ -27,9 +27,6 @@ COPY requirements.txt setup.py /app/
 RUN pip install -r requirements.txt && \
     python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
-# Cache the pretrained BERT model
-RUN python -c "from transformers import BertModel; BertModel.from_pretrained('bert-large-uncased-whole-word-masking')"
-
 # Download & cache embedding
 RUN mkdir -p /app/third_party/phow2v_emb && \
     cd /app/third_party/phow2v_emb && \
