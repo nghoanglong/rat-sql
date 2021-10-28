@@ -108,7 +108,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     },
 
     lr_scheduler+: {
-        name: 'bert_warmup_polynomial_group',
+        name: 'phobert_warmup_polynomial_group',
         start_lrs: [args.lr, args.bert_lr],
         end_lr: args.end_lr,
         num_warmup_steps: $.train.max_steps / 8,

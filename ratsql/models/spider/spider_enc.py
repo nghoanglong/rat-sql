@@ -847,7 +847,7 @@ class SpiderEncoderBertPreproc(SpiderEncoderV2Preproc):
     def _tokenize(self, presplit, unsplit):
         if self.tokenizer:
             toks = self.tokenizer.tokenize(unsplit)
-            return toks[0]
+            return toks
         return presplit
 
     def add_item(self, item, section, validation_info):
@@ -1209,7 +1209,6 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         self.counted_db_ids = set()
         self.preprocessed_schemas = {}
 
-        self.vncorenlp_tokenizer = vncorenlp.VNCoreNLP()
         self.tokenizer = AutoTokenizer.from_pretrained(bert_version)
 
         # TODO: should get types from the data
@@ -1217,9 +1216,9 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         self.tokenizer.add_tokens([f"<type: {t}>" for t in column_types])
 
     def _tokenize(self, presplit, unsplit):
-        if self.vncorenlp_tokenizer:
-            toks = self.vncorenlp_tokenizer.tokenize(unsplit)
-            return toks
+        toks = self.vncorenlp.tokenize(unsplit)
+        if toks[0]:
+            return toks[0]
         return presplit
 
     def add_item(self, item, section, validation_info):
@@ -1229,9 +1228,9 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
     def preprocess_item(self, item, validation_info):
         question = self._tokenize(item.text, item.orig['question'])
         preproc_schema = self._preprocess_schema(item.schema)
-        question_bert_tokens = PhoBertokens(question)
+        question_phobert_tokens = PhoBertokens(question)
         if self.compute_sc_link:
-            sc_link = question_bert_tokens.bert_schema_linking(
+            sc_link = question_phobert_tokens.phobert_schema_linking(
                 preproc_schema.normalized_column_names,
                 preproc_schema.normalized_table_names
             )
@@ -1239,7 +1238,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
             sc_link = {"q_col_match": {}, "q_tab_match": {}}
 
         if self.compute_cv_link:
-            cv_link = question_bert_tokens.bert_cv_linking(item.schema)
+            cv_link = question_phobert_tokens.phobert_cv_linking(item.schema)
         else:
             cv_link = {"num_date_match": {}, "cell_match": {}}
 
@@ -1311,7 +1310,7 @@ class SpiderEncoderBert(torch.nn.Module):
         self._device = device
         self.preproc = preproc
         self.bert_token_type = bert_token_type
-        self.base_enc_hidden_size = 1024 if bert_version == "phobert-large" else 768
+        self.base_enc_hidden_size = 1024 if bert_version == "vinai/phobert-large" else 768
 
         assert summarize_header in ["first", "avg"]
         self.summarize_header = summarize_header
@@ -1337,7 +1336,6 @@ class SpiderEncoderBert(torch.nn.Module):
 
         self.phobert_model = AutoModel.from_pretrained(bert_version)
         self.tokenizer = self.preproc.tokenizer
-        self.vncorenlp_tokenizer = self.preproc.vncorenlp_tokenizer
         self.phobert_model.resize_token_embeddings(len(self.tokenizer))  # several tokens added
 
     def forward(self, descs):
@@ -1405,10 +1403,10 @@ class SpiderEncoderBert(torch.nn.Module):
 
         if self.bert_token_type:
             tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
-            bert_output = self.bert_model(tokens_tensor,
+            bert_output = self.phobert_model(tokens_tensor,
                                           attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
         else:
-            bert_output = self.bert_model(tokens_tensor,
+            bert_output = self.phobert_model(tokens_tensor,
                                           attention_mask=att_masks_tensor)[0]
 
         enc_output = bert_output
@@ -1512,7 +1510,7 @@ class SpiderEncoderBert(torch.nn.Module):
         if not isinstance(toks[0], list):  # encode question words
             indexed_tokens = self.tokenizer.convert_tokens_to_ids(toks)
             tokens_tensor = torch.tensor([indexed_tokens]).to(self._device)
-            outputs = self.bert_model(tokens_tensor)
+            outputs = self.phobert_model(tokens_tensor)
             return outputs[0][0, 1:-1]  # remove [CLS] and [SEP]
         else:
             max_len = max([len(it) for it in toks])
@@ -1523,7 +1521,7 @@ class SpiderEncoderBert(torch.nn.Module):
                 tok_ids.append(indexed_tokens)
 
             tokens_tensor = torch.tensor(tok_ids).to(self._device)
-            outputs = self.bert_model(tokens_tensor)
+            outputs = self.phobert_model(tokens_tensor)
             return outputs[0][:, 0, :]
 
     def check_bert_seq(self, toks):

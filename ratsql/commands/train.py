@@ -127,6 +127,21 @@ class Trainer:
                                                   config.get('lr_scheduler', {'name': 'noop'}),
                                                   param_groups=[optimizer.non_bert_param_group,
                                                                 optimizer.bert_param_group])
+            elif config["optimizer"].get("name", None) == 'Adamw':
+                phobert_params = list(self.model.encoder.phobert_model.parameters())
+                assert len(phobert_params) > 0
+                non_phobert_params = []
+                for name, _param in self.model.named_parameters():
+                    if "phobert" not in name:
+                        non_phobert_params.append(_param)
+                assert len(non_phobert_params) + len(phobert_params) == len(list(self.model.parameters()))
+
+                optimizer = registry.construct('optimizer', config['optimizer'], non_phobert_params=non_phobert_params,
+                                               phobert_params=phobert_params)
+                lr_scheduler = registry.construct('lr_scheduler',
+                                                  config.get('lr_scheduler', {'name': 'noop'}),
+                                                  param_groups=[optimizer.non_phobert_param_group,
+                                                                optimizer.phobert_param_group])
             else:
                 optimizer = registry.construct('optimizer', config['optimizer'], params=self.model.parameters())
                 lr_scheduler = registry.construct('lr_scheduler',

@@ -103,6 +103,19 @@ class BertAdamW(transformers.AdamW):
         if "name" in kwargs: del kwargs["name"]  # TODO: fix this
         super(BertAdamW, self).__init__(params, lr=lr, **kwargs)
 
+@registry.register('optimizer', 'AdamW')
+class AdamW(transformers.AdamW):
+    """
+    Given a model and its bert module, create parameter groups with different lr
+    """
+
+    def __init__(self, non_phobert_params, phobert_params, lr=1e-3, phobert_lr=1e-5, **kwargs):
+        self.phobert_param_group = {"params": phobert_params, "lr": phobert_lr, "weight_decay": 0}
+        self.non_phobert_param_group = {"params": non_phobert_params}
+
+        params = [self.non_phobert_param_group, self.phobert_param_group]
+        if "name" in kwargs: del kwargs["name"]  # TODO: fix this
+        super(AdamW, self).__init__(params, lr=lr, **kwargs)
 
 @registry.register('lr_scheduler', 'bert_warmup_polynomial_group')
 @attr.s
@@ -120,6 +133,32 @@ class BertWarmupPolynomialLRSchedulerGroup(WarmupPolynomialLRScheduler):
                     warmup_frac_done = current_step / self.num_warmup_steps
                     new_lr = start_lr * warmup_frac_done
                 else:  # fix bert during warm-up
+                    assert i == 1
+                    new_lr = 0
+            else:
+                new_lr = (
+                        (start_lr - self.end_lr) * (
+                            1 - (current_step - self.num_warmup_steps) / self.decay_steps) ** self.power
+                        + self.end_lr)
+
+            param_group['lr'] = new_lr
+
+@registry.register('lr_scheduler', 'phobert_warmup_polynomial_group')
+@attr.s
+class PhoBertWarmupPolynomialLRSchedulerGroup(WarmupPolynomialLRScheduler):
+    """
+    Set the lr of bert to be zero when the other param group is warming-up
+    """
+    start_lrs = attr.ib()
+
+    # Bert parameters are in the second group by default
+    def update_lr(self, current_step):
+        for i, (start_lr, param_group) in enumerate(zip(self.start_lrs, self.param_groups)):
+            if current_step < self.num_warmup_steps:
+                if i == 0:
+                    warmup_frac_done = current_step / self.num_warmup_steps
+                    new_lr = start_lr * warmup_frac_done
+                else:  # fix phobert during warm-up
                     assert i == 1
                     new_lr = 0
             else:
