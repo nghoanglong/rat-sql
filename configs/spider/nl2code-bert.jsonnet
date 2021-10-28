@@ -1,4 +1,4 @@
-local _base = import 'nl2code-base.libsonnet';
+local _base = import '../nl2code-base.libsonnet';
 local _output_from = true;
 local _fs = 2;
 
