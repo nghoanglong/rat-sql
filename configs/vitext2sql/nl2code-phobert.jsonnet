@@ -9,7 +9,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     local bert_lr_s = '%0.1e' % args.bert_lr,
     local end_lr_s = if args.end_lr == 0 then '0e0' else '%0.1e' % args.end_lr,
 
-    local base_bert_enc_size = if args.bert_version == "bert-large-uncased-whole-word-masking" then 1024 else 768,
+    local base_bert_enc_size = if args.bert_version == "vinai/phobert-large" then 1024 else 768,
     local enc_size =  base_bert_enc_size,
     local PREFIX = data_path,
 
@@ -30,7 +30,7 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     },
     model+: {
         encoder+: {
-            name: 'spider-bert',
+            name: 'vitext2sql-phobert',
             batch_encs_update:: null,
             question_encoder:: null,
             column_encoder:: null,
@@ -102,9 +102,9 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
     },
 
     optimizer: {
-        name: 'bertAdamw',
+        name: 'Adamw',
         lr: 0.0,
-        bert_lr: 0.0,
+        bert_lr: 0.0002,
     },
 
     lr_scheduler+: {
