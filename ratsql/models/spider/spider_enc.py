@@ -1263,7 +1263,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         num_words = len(question) + 2 + \
                     sum(len(c) + 1 for c in preproc_schema.column_names) + \
                     sum(len(t) + 1 for t in preproc_schema.table_names)
-        if num_words > 512:
+        if num_words > 256:
             return False, None  # remove long sequences
         else:
             return True, None
@@ -1357,7 +1357,7 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             token_list = qs + [c for col in cols for c in col] + \
                          [t for tab in tabs for t in tab]
             assert self.check_bert_seq(token_list)
-            if len(token_list) > 512:
+            if len(token_list) > 256:
                 long_seq_set.add(batch_idx)
                 continue
 
@@ -1489,7 +1489,7 @@ class SpiderEncoderPhoBert(torch.nn.Module):
     @DeprecationWarning
     def encoder_long_seq(self, desc):
         """
-        Since bert cannot handle sequence longer than 512, each column/table is encoded individually
+        Since phobert cannot handle sequence longer than 256, each column/table is encoded individually
         The representation of a column/table is the vector of the first token [CLS]
         """
         qs = self.pad_single_sentence_for_bert(desc['question'], cls=True)
@@ -1535,7 +1535,7 @@ class SpiderEncoderPhoBert(torch.nn.Module):
     def pad_sequence_for_bert_batch(self, tokens_lists):
         pad_id = self.tokenizer.pad_token_id
         max_len = max([len(it) for it in tokens_lists])
-        assert max_len <= 512
+        assert max_len <= 256
         toks_ids = []
         att_masks = []
         tok_type_lists = []
