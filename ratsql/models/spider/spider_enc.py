@@ -1486,7 +1486,6 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             ))
         return result
 
-    @DeprecationWarning
     def encoder_long_seq(self, desc):
         """
         Since phobert cannot handle sequence longer than 256, each column/table is encoded individually
@@ -1501,7 +1500,6 @@ class SpiderEncoderPhoBert(torch.nn.Module):
         enc_tab = self._bert_encode(tabs)
         return enc_q, enc_col, enc_tab
 
-    @DeprecationWarning
     def _bert_encode(self, toks):
         if not isinstance(toks[0], list):  # encode question words
             indexed_tokens = self.tokenizer.convert_tokens_to_ids(toks)
