@@ -2,7 +2,7 @@
     logdir: "logdir/bert_run",
     model_config: "configs/vitext2sql/nl2code-phobert.jsonnet",
     model_config_args: {
-        data_path: 'data/vitext2sql/',
+        data_path: 'data/vitext2sql_syllable_level/',
         bs: 3,
         num_batch_accumulated: 4,
         bert_version: "vinai/phobert-large",
