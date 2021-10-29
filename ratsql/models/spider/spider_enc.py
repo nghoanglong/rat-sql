@@ -1422,7 +1422,7 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             for desc in descs
         ]
 
-        assert len(long_seq_set) == 0  # remove them for now
+        # assert len(long_seq_set) == 0  # remove them for now
 
         result = []
         for batch_idx, desc in enumerate(descs):
