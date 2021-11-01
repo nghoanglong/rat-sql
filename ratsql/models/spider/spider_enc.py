@@ -1214,7 +1214,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         column_types = ["text", "number", "time", "boolean", "others"]
         self.tokenizer.add_tokens([f"<type: {t}>" for t in column_types])
     def _tokenize(self, presplit, unsplit):
-        toks = self.vncorenlp.tokenize(unsplit)
+        toks = vncorenlp.tokenize(unsplit)
         if toks[0]:
             return toks[0]
         return presplit
