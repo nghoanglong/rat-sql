@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.5-cuda10.1-cudnn7-devel
+FROM nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu20.04
 
 ENV LC_ALL=C.UTF-8 \
     LANG=C.UTF-8
@@ -28,10 +28,10 @@ RUN pip install -r requirements.txt && \
     python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
 # Download & cache embedding
-RUN mkdir -p /app/third_party/phow2v_emb && \
-    cd /app/third_party/phow2v_emb && \
-    wget https://public.vinai.io/word2vec_vi_words_300dims.zip && \
-    unzip word2vec_vi_words_300dims.zip
+# RUN mkdir -p /app/data/phow2v_emb
+    # cd /app/third_party/phow2v_emb && \
+    # wget https://public.vinai.io/word2vec_vi_words_300dims.zip && \
+    # unzip word2vec_vi_words_300dims.zip
 
 # Copy all the rest
 COPY . .

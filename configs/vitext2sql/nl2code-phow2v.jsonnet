@@ -1,6 +1,6 @@
 local _base = import '../nl2code-base.libsonnet';
 local _data_path = 'data/vitext2sql_syllable_level/';
-local _embedding_path = 'third_party/phow2v_emb/word2vec_vi_words_300dims.txt';
+local _embedding_path = 'data/phow2v_emb/word2vec_vi_words_300dims.txt';
 
 function(args, data_path=_data_path) _base(output_from=true, data_path=data_path) + {
     local lr = 0.000743552663260837,
