@@ -1,7 +1,8 @@
 FROM nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu20.04
 
 ENV LC_ALL=C.UTF-8 \
-    LANG=C.UTF-8
+    LANG=C.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive 
 
 RUN mkdir -p /usr/share/man/man1 && \
     apt-get update && apt-get install -y \
