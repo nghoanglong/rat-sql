@@ -1263,7 +1263,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         num_words = len(question) + 2 + \
                     sum(len(c) + 1 for c in preproc_schema.column_names) + \
                     sum(len(t) + 1 for t in preproc_schema.table_names)
-        if num_words > 256:
+        if num_words > 512:
             return False, None  # remove long sequences
         else:
             return True, None
