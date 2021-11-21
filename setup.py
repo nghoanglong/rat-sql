@@ -29,9 +29,6 @@ setup(
         'transformers~=4.12.3',
         'stanza~=1.3.0',
         'vncorenlp~=1.0.3',
-        'torch==1.5.0',
-        'torchvision==0.6.0',
-        'torchtext~=0.3.1',
     ],
     entry_points={"console_scripts": ["ratsql=run:main"]},
 )

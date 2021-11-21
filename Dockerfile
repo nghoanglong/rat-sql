@@ -25,7 +25,8 @@ WORKDIR /app
 COPY requirements.txt setup.py /app/
 
 # Install packages
-RUN pip install -r requirements.txt && \
+RUN pip install torch==1.5.0+cu101 torchvision==0.6.0+cu101 torchtext~=0.3.1 -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip install -r requirements.txt && \
     python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
 # Assume that the datasets will be mounted as a volume into /mnt/data on startup.
