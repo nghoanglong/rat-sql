@@ -1263,7 +1263,7 @@ class Vitext2sqlEncoderPhoBertPreproc(SpiderEncoderV2Preproc):
         num_words = len(question) + 2 + \
                     sum(len(c) + 1 for c in preproc_schema.column_names) + \
                     sum(len(t) + 1 for t in preproc_schema.table_names)
-        if num_words > 512:
+        if num_words > 256:
             return False, None  # remove long sequences
         else:
             return True, None
@@ -1396,14 +1396,17 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             batch_id_map[batch_idx] = len(batch_id_map)
 
         padded_token_lists, att_mask_lists, tok_type_lists = self.pad_sequence_for_bert_batch(batch_token_lists)
-        tokens_tensor = torch.LongTensor(padded_token_lists).to(self._device)
-        att_masks_tensor = torch.LongTensor(att_mask_lists).to(self._device)
+        if len(padded_token_lists) != 0:
+            tokens_tensor = torch.LongTensor(padded_token_lists).to(self._device)
+            att_masks_tensor = torch.LongTensor(att_mask_lists).to(self._device)
 
-        if self.bert_token_type:
-            tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
-            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
+            if self.bert_token_type:
+                tok_type_tensor = torch.LongTensor(tok_type_lists).to(self._device)
+                phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
+            else:
+                phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
         else:
-            phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
+            phobert_output = torch.empty(1712)
 
         enc_output = phobert_output
 
@@ -1531,6 +1534,8 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             return toks + [self.tokenizer.sep_token]
 
     def pad_sequence_for_bert_batch(self, tokens_lists):
+        if len(tokens_lists) == 0:
+            return [], [], []
         pad_id = self.tokenizer.pad_token_id
         max_len = max([len(it) for it in tokens_lists])
         assert max_len <= 256
