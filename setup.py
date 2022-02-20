@@ -19,7 +19,7 @@ setup(
         'jsonnet~=0.14.0',
         'networkx~=2.6.3',
         'nltk~=3.6.5',
-        'numpy~=1.19.5',
+        'numpy~=1.21.5',
         'pyrsistent~=0.14.11',
         'pytest~=5.3.5',
         'records~=0.5.3',
