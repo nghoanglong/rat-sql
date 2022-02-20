@@ -176,7 +176,7 @@ class SpiderDataset(torch.utils.data.Dataset):
         def __init__(self, dataset):
             self.dataset = dataset
             self.foreign_key_maps = {
-                db_id: evaluation.build_foreign_key_map(schema.orig)
+                db_id: evaluation.build_foreign_key_map_vitext2sql(schema.orig)
                 for db_id, schema in self.dataset.schemas.items()
             }
             self.evaluator = evaluation.Evaluator(
