@@ -27,6 +27,8 @@ from ratsql.utils import saver as saver_mod
 # noinspection PyUnresolvedReferences
 from ratsql.utils import vocab
 
+import infer, eval
+
 
 @attr.s
 class TrainConfig:
@@ -53,6 +55,28 @@ class TrainConfig:
     num_batch_accumulated = attr.ib(default=1)
     clip_grad = attr.ib(default=None)
 
+@attr.s
+class InferConfig:
+    config = attr.ib()
+    config_args = attr.ib()
+    logdir = attr.ib()
+    section = attr.ib()
+    beam_size = attr.ib()
+    output = attr.ib()
+    step = attr.ib()
+    use_heuristic = attr.ib(default=False)
+    mode = attr.ib(default="infer")
+    limit = attr.ib(default=None)
+    output_history = attr.ib(default=False)
+
+@attr.s
+class EvalConfig:
+    config = attr.ib()
+    config_args = attr.ib()
+    logdir = attr.ib()
+    section = attr.ib()
+    inferred = attr.ib()
+    output = attr.ib()
 
 class Logger:
     def __init__(self, log_path=None, reopen_to_flush=False):
@@ -102,7 +126,7 @@ class Trainer:
                                             preproc=self.model_preproc, device=self.device)
             self.model.to(self.device)
 
-    def train(self, config, modeldir):
+    def train(self, config, model_config_file, model_config_args, exp_config, modeldir):
         # slight difference here vs. unrefactored train: The init_random starts over here.
         # Could be fixed if it was important by saving random state at end of init
         with self.init_random:
@@ -228,6 +252,32 @@ class Trainer:
                 # Run saver
                 if last_step == 1 or last_step % self.train_config.save_every_n == 0:
                     saver.save(modeldir, last_step)
+                    infer_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.infer"
+                    infer_config = InferConfig(
+                        model_config_file,
+                        model_config_args,
+                        modeldir,
+                        exp_config["eval_section"],
+                        exp_config["eval_beam_size"],
+                        infer_output_path,
+                        last_step,
+                        use_heuristic=exp_config["eval_use_heuristic"]
+                    )
+                    infer.main(infer_config)
+
+                    eval_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.eval"
+                    eval_config = EvalConfig(
+                        model_config_file,
+                        model_config_args,
+                        modeldir,
+                        exp_config["eval_section"],
+                        infer_output_path,
+                        eval_output_path
+                    )
+                    eval.main(eval_config)
+
+                    res_json = json.load(open(eval_output_path))
+                    print(f"step {last_step} (exact score) = {res_json['total_scores']['all']['exact']}")
 
             # Save final model
             saver.save(modeldir, last_step)
@@ -293,7 +343,7 @@ def main(args):
 
     # Construct trainer and do training
     trainer = Trainer(logger, config)
-    trainer.train(config, modeldir=args.logdir)
+    trainer.train(config, args.config, args.config_args, args.exp_config, modeldir=args.logdir)
 
 
 if __name__ == '__main__':

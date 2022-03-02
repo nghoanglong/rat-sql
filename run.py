@@ -17,6 +17,7 @@ class PreprocessConfig:
 class TrainConfig:
     config = attr.ib()
     config_args = attr.ib()
+    exp_config = attr.ib()
     logdir = attr.ib()
 
 
@@ -73,7 +74,7 @@ def main():
         preprocess.main(preprocess_config)
     elif args.mode == "train":
         train_config = TrainConfig(model_config_file,
-                                   model_config_args, logdir)
+                                   model_config_args, exp_config, logdir)
         train.main(train_config)
     elif args.mode == "eval":
         for step in exp_config["eval_steps"]:

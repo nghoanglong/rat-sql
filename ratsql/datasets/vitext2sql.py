@@ -182,7 +182,7 @@ class SpiderDataset(torch.utils.data.Dataset):
             self.evaluator = evaluation.Evaluator(
                 self.dataset.db_path,
                 self.foreign_key_maps,
-                'match',
+                'all',
                 self.dataset.table_path)
             self.results = []
 
@@ -207,7 +207,7 @@ class SpiderDataset(torch.utils.data.Dataset):
 
         def finalize(self):
             self.evaluator.finalize()
-            
+            evaluation.print_scores(self.evaluator.finalize(), 'all')
             return {
                 'per_item': self.results,
                 'total_scores': self.evaluator.scores
