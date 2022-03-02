@@ -1394,9 +1394,8 @@ class SpiderEncoderPhoBert(torch.nn.Module):
                 batch_id_to_retrieve_table_2.append(table_rep_ids_2)
 
             batch_id_map[batch_idx] = len(batch_id_map)
-
-        padded_token_lists, att_mask_lists, tok_type_lists = self.pad_sequence_for_bert_batch(batch_token_lists)
-        if len(padded_token_lists) != 0:
+        if len(batch_token_lists) != 0:
+            padded_token_lists, att_mask_lists, tok_type_lists = self.pad_sequence_for_bert_batch(batch_token_lists)
             tokens_tensor = torch.LongTensor(padded_token_lists).to(self._device)
             att_masks_tensor = torch.LongTensor(att_mask_lists).to(self._device)
 
@@ -1405,10 +1404,8 @@ class SpiderEncoderPhoBert(torch.nn.Module):
                 phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor, token_type_ids=tok_type_tensor)[0]
             else:
                 phobert_output = self.phobert_model(tokens_tensor, attention_mask=att_masks_tensor)[0]
-        else:
-            phobert_output = torch.empty(1712)
 
-        enc_output = phobert_output
+            enc_output = phobert_output
 
         column_pointer_maps = [
             {
@@ -1534,8 +1531,6 @@ class SpiderEncoderPhoBert(torch.nn.Module):
             return toks + [self.tokenizer.sep_token]
 
     def pad_sequence_for_bert_batch(self, tokens_lists):
-        if len(tokens_lists) == 0:
-            return [], [], []
         pad_id = self.tokenizer.pad_token_id
         max_len = max([len(it) for it in tokens_lists])
         assert max_len <= 256
