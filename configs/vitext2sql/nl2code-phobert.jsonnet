@@ -27,6 +27,12 @@ function(args) _base(output_from=_output_from, data_path=args.data_path) + {
         val+:{
             name: 'vitext2sql',
         },
+        test+:{
+            name: 'vitext2sql',
+            paths: [PREFIX + 'test.json'],
+            tables_paths: [PREFIX + 'tables.json'],
+            db_path: PREFIX + 'database',
+        },
     },
     model+: {
         pretrained_model_name: 'phobert',

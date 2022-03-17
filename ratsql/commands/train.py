@@ -27,7 +27,7 @@ from ratsql.utils import saver as saver_mod
 # noinspection PyUnresolvedReferences
 from ratsql.utils import vocab
 
-import infer, eval
+from ratsql.commands import infer, eval
 
 
 @attr.s
@@ -252,32 +252,33 @@ class Trainer:
                 # Run saver
                 if last_step == 1 or last_step % self.train_config.save_every_n == 0:
                     saver.save(modeldir, last_step)
-                    infer_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.infer"
-                    infer_config = InferConfig(
-                        model_config_file,
-                        model_config_args,
-                        modeldir,
-                        exp_config["eval_section"],
-                        exp_config["eval_beam_size"],
-                        infer_output_path,
-                        last_step,
-                        use_heuristic=exp_config["eval_use_heuristic"]
-                    )
-                    infer.main(infer_config)
+                    if last_step % 1000 == 0:
+                        infer_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.infer"
+                        infer_config = InferConfig(
+                            model_config_file,
+                            model_config_args,
+                            modeldir,
+                            exp_config["eval_section"],
+                            exp_config["eval_beam_size"],
+                            infer_output_path,
+                            last_step,
+                            use_heuristic=exp_config["eval_use_heuristic"]
+                        )
+                        infer.main(infer_config)
 
-                    eval_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.eval"
-                    eval_config = EvalConfig(
-                        model_config_file,
-                        model_config_args,
-                        modeldir,
-                        exp_config["eval_section"],
-                        infer_output_path,
-                        eval_output_path
-                    )
-                    eval.main(eval_config)
+                        eval_output_path = f"{exp_config['eval_output']}/{exp_config['eval_name']}-step{last_step}.eval"
+                        eval_config = EvalConfig(
+                            model_config_file,
+                            model_config_args,
+                            modeldir,
+                            exp_config["eval_section"],
+                            infer_output_path,
+                            eval_output_path
+                        )
+                        eval.main(eval_config)
 
-                    res_json = json.load(open(eval_output_path))
-                    print(f"step {last_step} (exact score) = {res_json['total_scores']['all']['exact']}")
+                        res_json = json.load(open(eval_output_path))
+                        print(f"step {last_step} (exact score) = {res_json['total_scores']['all']['exact']}")
 
             # Save final model
             saver.save(modeldir, last_step)

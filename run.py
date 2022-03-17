@@ -2,10 +2,20 @@
 
 import argparse
 import json
+import torch
 
 import _jsonnet
 import attr
 from ratsql.commands import preprocess, train, infer, eval
+from ratsql.utils import registry
+
+@attr.s
+class SpiderItem:
+    text = attr.ib()
+    code = attr.ib()
+    schema = attr.ib()
+    orig = attr.ib()
+    orig_schema = attr.ib()
 
 @attr.s
 class PreprocessConfig:
@@ -44,6 +54,48 @@ class EvalConfig:
     section = attr.ib()
     inferred = attr.ib()
     output = attr.ib()
+
+def predict(exp_config, model_config_args, logdir, input_nl, db_id):
+    model_config_file = exp_config["model_config"]
+    
+    infer_output_path = "{}/{}-step{}.infer".format(
+            exp_config["eval_output"], exp_config["eval_name"], exp_config["eval_steps"][0]
+    )
+    infer_config = InferConfig(
+        model_config_file,
+        model_config_args,
+        logdir,
+        exp_config["eval_section"],
+        exp_config["eval_beam_size"],
+        infer_output_path,
+        exp_config["eval_steps"][0],
+        debug=exp_config["eval_debug"],
+        method=exp_config["eval_method"],
+    )
+    setup_infer, output_path = infer.setup(infer_config)
+    inferer = infer.Inferer(setup_infer)
+    pretrained_model = inferer.load_model(logdir, exp_config["eval_steps"][0])
+    dataset = registry.construct('dataset', inferer.config['data']['test'])
+
+    for _, schema in dataset.schemas.items():
+        pretrained_model.preproc.enc_preproc.preprocess_schema(schema)
+
+    def question(q, db_id):
+        spider_schema = dataset.schemas[db_id]
+        data_item = SpiderItem(
+            text=None,
+            code=None,
+            schema=spider_schema,
+            orig_schema=spider_schema.orig,
+            orig={"question": q}
+        )
+        pretrained_model.preproc.clear_items()
+        enc_input = pretrained_model.preproc.enc_preproc.preprocess_item(data_item)
+        preproc_data = enc_input, None
+        with torch.no_grad():
+            return inferer._infer_one(pretrained_model, data_item, preproc_data, beam_size=1)
+    
+    return question(input_nl, db_id)
 
 
 def main():
@@ -104,6 +156,11 @@ def main():
 
             res_json = json.load(open(eval_output_path))
             print(step, res_json['total_scores']['all']['exact'])
+    else:
+        db_id = input('enter database name: ')
+        input_nl = input('enter vietnamese question: ')
+        decoded = predict(exp_config, model_config_args, logdir, input_nl, db_id)
+        print(f'predicted query = {decoded[0]["inferred_code"]}')
 
 
 if __name__ == "__main__":
