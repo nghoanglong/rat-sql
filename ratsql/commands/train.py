@@ -248,7 +248,6 @@ class Trainer:
                 if last_step % self.train_config.report_every_n == 0:
                     self.logger.log(f'Step {last_step}: loss={loss.item()}')
 
-                last_step += 1
                 # Run saver
                 if last_step == 1 or last_step % self.train_config.save_every_n == 0:
                     saver.save(modeldir, last_step)
@@ -279,7 +278,8 @@ class Trainer:
 
                         res_json = json.load(open(eval_output_path))
                         print(f"step {last_step} (exact score) = {res_json['total_scores']['all']['exact']}")
-
+                        
+                last_step += 1
             # Save final model
             saver.save(modeldir, last_step)
 
