@@ -142,12 +142,18 @@ def main():
             res_json = json.load(open(eval_output_path))
             print(step, res_json['total_scores']['all']['exact'])
     else:
-        output_file = open(exp_config["logdir"] + "/predicted_file.txt", "w", encoding='utf-8')
-        config = json.loads(_jsonnet.evaluate_file(model_config_file, tla_codes={'args': model_config_args}))
-        data = json.load(open(config["data"]["test"]["paths"][0]))
-        for value in data:
-            decoded = predict(exp_config, model_config_args, logdir, value["question"], value["db_id"])
-            output_file.write(decoded[0]["inferred_code"] + "\n")
+        # output_file = open(exp_config["logdir"] + "/predicted_file.txt", "w", encoding='utf-8')
+        # config = json.loads(_jsonnet.evaluate_file(model_config_file, tla_codes={'args': model_config_args}))
+        # data = json.load(open(config["data"]["test"]["paths"][0]))
+        # for value in data:
+        #     decoded = predict(exp_config, model_config_args, logdir, value["question"], value["db_id"])
+        #     output_file.write(decoded[0]["inferred_code"] + "\n")
+
+        db_id = input('enter database name: ')
+        input_nl = input('enter vietnamese question: ')
+        decoded = predict(exp_config, model_config_args, logdir, input_nl, db_id)
+        logger = train.Logger(exp_config["logdir"] + "/predicted_file.txt", True)
+        logger.log(decoded[0]["inferred_code"] + "\n")
 
 
 if __name__ == "__main__":
